@@ -18,8 +18,19 @@
   int radius;
   int circleX;
   int circleY;
+
   int birdY;
   int birdX;
+  int birdSize = 5;
+
+  int pipeWidth = 10;
+  int pipeHeight1 = random(20, 90);
+  int pipe1X = 165;
+  int pipeHeight2 = pipeHeight1 + random(-20, 20);
+  int pipe2X = 185;
+  int pipeHeight3 = pipeHeight2 + random(-20, 20);
+  int pipe3X = 205;
+  
   bool gameStatus = HIGH;
   bool gameSelected = HIGH;
 
@@ -29,6 +40,7 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 float p = 3.1415926;
 
 unsigned long lastFrame = 0;
+unsigned long screenBuffer = millis();
 const int frameDelay = 120; // ~30 FPS (1000ms / 30)
 
 // Abstract base class for a Scene
@@ -111,21 +123,33 @@ class TheFlap : public Scene {
 public:
   void update() override {
     bool isAPressed = digitalRead(buttonA);
-    if(isAPressed == LOW)
-    {
-      birdY = birdY - 20;
-    }
-    birdY = birdY + 5;
+    //if (screenBuffer - lastFrame >= frameDelay * 2)
+    //{
+      if(isAPressed == LOW)
+      {
+        birdY = birdY - 20;
+      }
+      birdY = birdY + 5;
+    //}
     if ((birdY + 8) >= 128  || (birdY + 8) <=0)
     {
       gameStatus = LOW;
     }
+    
+    pipe1X = pipe1X - 3;
   }
   void render() override 
   {
-    tft.fillCircle(birdX, birdY, 8, ST77XX_YELLOW);
-    delay(120);
-    tft.fillCircle(birdX, birdY, 8, ST77XX_BLACK);
+    //if (screenBuffer - lastFrame >= frameDelay * 2)
+    //{
+      tft.fillCircle(birdX, birdY, birdSize, ST77XX_YELLOW);
+      tft.fillRect(pipe1X, pipeHeight1, pipeWidth, 150, ST77XX_GREEN);
+      tft.fillRect(pipe1X, pipeHeight1 - 45, pipeWidth, -150, ST77XX_GREEN);
+      delay(120);
+      tft.fillCircle(birdX, birdY, birdSize, ST77XX_BLACK);
+      tft.fillRect(pipe1X, pipeHeight1, pipeWidth, 150, ST77XX_BLACK);
+      tft.fillRect(pipe1X, pipeHeight1 - 45, pipeWidth, -150, ST77XX_BLACK);
+    //} 
   }
 };
 
@@ -199,10 +223,10 @@ void setup(void) {
 
 void loop() 
 {
-  unsigned long now = millis();
-  if (now - lastFrame >= frameDelay)
+  screenBuffer = millis();
+  if (screenBuffer - lastFrame >= frameDelay)
   {
-    lastFrame = now;
+    lastFrame = screenBuffer;
     currentScene->update();
 
     static bool lastState = HIGH;
