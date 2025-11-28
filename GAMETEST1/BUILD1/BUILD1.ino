@@ -22,14 +22,16 @@
   int birdY;
   int birdX;
   int birdSize = 5;
+  float velocity;
+  float gravity = 0.0;
 
-  int pipeWidth = 10;
-  int pipeHeight1 = random(20, 90);
-  int pipe1X = 165;
-  int pipeHeight2 = pipeHeight1 + random(-20, 20);
-  int pipe2X = 185;
-  int pipeHeight3 = pipeHeight2 + random(-20, 20);
-  int pipe3X = 205;
+  int pipeWidth;
+  int pipeHeight1;
+  int pipe1X;
+  int pipeHeight2;
+  int pipe2X;
+  int pipeHeight3;
+  int pipe3X;
   
   bool gameStatus = HIGH;
   bool gameSelected = HIGH;
@@ -123,33 +125,56 @@ class TheFlap : public Scene {
 public:
   void update() override {
     bool isAPressed = digitalRead(buttonA);
-    //if (screenBuffer - lastFrame >= frameDelay * 2)
-    //{
-      if(isAPressed == LOW)
-      {
-        birdY = birdY - 20;
-      }
-      birdY = birdY + 5;
-    //}
-    if ((birdY + 8) >= 128  || (birdY + 8) <=0)
+    if(isAPressed == LOW)      
+    {
+      birdY = birdY - 20;
+    }
+    birdY = birdY + 5;
+    if ((birdY + birdSize) >= 128  || (birdY + birdSize) <=0)
     {
       gameStatus = LOW;
     }
-    
+    if ((birdY - birdSize) <= (pipeHeight1 - 45) && birdX == pipe1X)
+    {
+      gameStatus = LOW;
+    }
+    if ((birdY + birdSize) >= pipeHeight1 && birdX == pipe1X)
+    {
+      gameStatus = LOW;
+    }
     pipe1X = pipe1X - 3;
+    pipe2X = pipe2X -3;
+    pipe3X = pipe3X - 3;
+    if (pipe1X <= -10)
+    {
+      pipe1X = 165 + random(40, 80);
+    }
+    if (pipe2X <= -10)
+    {
+      pipe2X = pipe1X + random(40, 80);
+    }
+    if (pipe3X <= -10)
+    {
+      pipe3X = pipe2X + random(40, 80);
+    }
   }
   void render() override 
   {
-    //if (screenBuffer - lastFrame >= frameDelay * 2)
-    //{
       tft.fillCircle(birdX, birdY, birdSize, ST77XX_YELLOW);
       tft.fillRect(pipe1X, pipeHeight1, pipeWidth, 150, ST77XX_GREEN);
-      tft.fillRect(pipe1X, pipeHeight1 - 45, pipeWidth, -150, ST77XX_GREEN);
+      tft.fillRect(pipe1X, 0, pipeWidth, pipeHeight1 - 45, ST77XX_GREEN);
+      tft.fillRect(pipe2X, pipeHeight2, pipeWidth, 150, ST77XX_GREEN);
+      tft.fillRect(pipe2X, pipeHeight2 - 45, pipeWidth, -150, ST77XX_GREEN);
+      tft.fillRect(pipe3X, pipeHeight3, pipeWidth, 150, ST77XX_GREEN);
+      tft.fillRect(pipe3X, pipeHeight3 - 45, pipeWidth, -150, ST77XX_GREEN);
       delay(120);
       tft.fillCircle(birdX, birdY, birdSize, ST77XX_BLACK);
       tft.fillRect(pipe1X, pipeHeight1, pipeWidth, 150, ST77XX_BLACK);
       tft.fillRect(pipe1X, pipeHeight1 - 45, pipeWidth, -150, ST77XX_BLACK);
-    //} 
+      tft.fillRect(pipe2X, pipeHeight2, pipeWidth, 150, ST77XX_BLACK);
+      tft.fillRect(pipe2X, pipeHeight2 - 45, pipeWidth, -150, ST77XX_BLACK);
+      tft.fillRect(pipe3X, pipeHeight3, pipeWidth, 150, ST77XX_BLACK);
+      tft.fillRect(pipe3X, pipeHeight3 - 45, pipeWidth, -150, ST77XX_BLACK);
   }
 };
 
@@ -219,6 +244,14 @@ void setup(void) {
   birdX = tft.width()/3;
   circleX = tft.width()/2;
   circleY = tft.height()/2;
+  
+  pipeWidth = 10;
+  pipeHeight1 = random(55, 115);
+  pipe1X = 165;
+  pipeHeight2 = 64 + random(-9, 51);
+  pipe2X = 215 + random(20);
+  pipeHeight3 = 64 + random(-9, 51);
+  pipe3X = 265 + random(20);
 }
 
 void loop() 
@@ -258,7 +291,15 @@ void loop()
       else
       {
         tft.fillScreen(ST77XX_BLACK);
+        
         birdY = tft.height() / 2;
+        pipeHeight1 = random(50, 115);
+        pipe1X = 165;
+        pipeHeight2 = 64 + random(-9, 51);
+        pipe2X = 215 + random(20);
+        pipeHeight3 = 64 + random(-9, 51);
+        pipe3X = 265 + random(20);
+        
         gameStatus = HIGH;
         setScene(&title);
       }
